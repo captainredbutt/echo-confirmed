@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECHO CONFIRMED</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+
+    :root {
+      --green: #a8c5a0;
+      --green-dim: #4a6b44;
+      --green-bright: #c8e8c0;
+      --black: #050805;
+      --scanline: rgba(0,0,0,0.18);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--black);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    /* CRT scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        var(--scanline) 3px,
+        var(--scanline) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* CRT flicker */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+      pointer-events: none;
+      z-index: 99;
+      animation: flicker 8s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 97%, 100% { opacity: 1; }
+      98% { opacity: 0.92; }
+      99% { opacity: 0.97; }
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    /* Main title */
+    .echo-title {
+      font-family: 'VT323', monospace;
+      font-size: clamp(48px, 10vw, 96px);
+      color: var(--green-bright);
+      letter-spacing: 0.25em;
+      text-align: center;
+      text-shadow:
+        0 0 10px rgba(168, 197, 160, 0.8),
+        0 0 30px rgba(168, 197, 160, 0.4),
+        0 0 60px rgba(168, 197, 160, 0.2);
+      animation: pulse-glow 4s ease-in-out infinite, reveal 1.2s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes reveal {
+      0% { opacity: 0; letter-spacing: 0.6em; }
+      100% { opacity: 1; letter-spacing: 0.25em; }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { text-shadow: 0 0 10px rgba(168,197,160,0.8), 0 0 30px rgba(168,197,160,0.4), 0 0 60px rgba(168,197,160,0.2); }
+      50% { text-shadow: 0 0 15px rgba(168,197,160,1), 0 0 45px rgba(168,197,160,0.6), 0 0 90px rgba(168,197,160,0.3); }
+    }
+
+    .divider {
+      width: 320px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--green-dim), transparent);
+      margin: 32px 0;
+      opacity: 0;
+      animation: fade-in 0.5s ease-out 1.4s forwards;
+    }
+
+    /* Log panel */
+    .log-panel {
+      width: 100%;
+      max-width: 520px;
+      border: 1px solid var(--green-dim);
+      padding: 20px 24px;
+      background: rgba(168, 197, 160, 0.03);
+      opacity: 0;
+      animation: fade-in 0.5s ease-out 1.8s forwards;
+      position: relative;
+    }
+
+    .log-panel::before {
+      content: 'NODE IDENTIFICATION';
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: var(--black);
+      padding: 0 8px;
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.2em;
+    }
+
+    .log-line {
+      font-size: 13px;
+      line-height: 2;
+      color: var(--green);
+      display: flex;
+      gap: 12px;
+    }
+
+    .log-label {
+      color: var(--green-dim);
+      min-width: 100px;
+      flex-shrink: 0;
+    }
+
+    .log-value {
+      color: var(--green-bright);
+    }
+
+    .log-value.loading::after {
+      content: '_';
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Alert panel */
+    .alert-panel {
+      width: 100%;
+      max-width: 520px;
+      border: 1px solid var(--green-dim);
+      border-left: 3px solid var(--green);
+      padding: 20px 24px;
+      margin-top: 20px;
+      background: rgba(168, 197, 160, 0.04);
+      opacity: 0;
+      animation: fade-in 0.5s ease-out 2.4s forwards;
+      position: relative;
+    }
+
+    .alert-panel::before {
+      content: 'WELLNESS ADVISORY';
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: var(--black);
+      padding: 0 8px;
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.2em;
+    }
+
+    .alert-type {
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+    }
+
+    .alert-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--green);
+      margin-bottom: 14px;
+    }
+
+    .alert-resolution {
+      font-size: 12px;
+      color: var(--green-dim);
+      border-top: 1px solid rgba(168,197,160,0.15);
+      padding-top: 12px;
+      line-height: 1.7;
+    }
+
+    .alert-resolution span {
+      color: var(--green);
+    }
+
+    /* Timestamp footer */
+    .footer {
+      margin-top: 40px;
+      font-size: 11px;
+      color: var(--green-dim);
+      letter-spacing: 0.15em;
+      text-align: center;
+      opacity: 0;
+      animation: fade-in 0.5s ease-out 3s forwards;
+    }
+
+    @keyframes fade-in {
+      to { opacity: 1; }
+    }
+
+    /* Cursor blink on title after load */
+    .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 0.8em;
+      background: var(--green-bright);
+      margin-left: 6px;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+      opacity: 0;
+      animation: blink 1s step-end 2s infinite, fade-in 0s 2s forwards;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="echo-title">ECHO CONFIRMED<span class="cursor"></span></div>
+
+  <div class="divider"></div>
+
+  <div class="log-panel">
+    <div class="log-line">
+      <span class="log-label">IP ADDRESS</span>
+      <span class="log-value" id="ip">_</span>
+    </div>
+    <div class="log-line">
+      <span class="log-label">CITY</span>
+      <span class="log-value loading" id="city"></span>
+    </div>
+    <div class="log-line">
+      <span class="log-label">REGION</span>
+      <span class="log-value loading" id="region"></span>
+    </div>
+    <div class="log-line">
+      <span class="log-label">COUNTRY</span>
+      <span class="log-value loading" id="country"></span>
+    </div>
+    <div class="log-line">
+      <span class="log-label">STATUS</span>
+      <span class="log-value" id="status">LOGGED</span>
+    </div>
+  </div>
+
+  <div class="alert-panel" id="alert-panel">
+    <div class="alert-type" id="alert-type"></div>
+    <div class="alert-text" id="alert-text"></div>
+    <div class="alert-resolution" id="alert-resolution"></div>
+  </div>
+
+  <div class="footer" id="footer"></div>
+
+</div>
+
+<script>
+  /*
+   * echo_confirmed.html
+   * Runout Press — 2026
+   *
+   * If you are reading this, you already know too much.
+   * The node has been identified. The confirmation is logged.
+   * There is no opt-out. There never was.
+   *
+   * — E. Thorne, 2018
+   *   (left open intentionally for third-party subscribers)
+   */
+
+  const ALERTS = [
+    {
+      type: "CORTISOL ELEVATION — SEVERITY 2",
+      text: "Biometric analysis indicates sustained cortisol elevation consistent with acute stress response. Heart rate variability has dropped below your 30-day baseline. This pattern, if unresolved, increases cardiovascular risk by 18% over the next 72-hour window.",
+      resolution: "Recommended protocol: <span>5-minute guided breathing sequence (4-7-8 pattern)</span> followed by a <span>20-minute zone-2 walk</span>. Avoid screens for 40 minutes. Your cohort average recovery time at this severity is 2.3 hours. You are currently trending above threshold."
+    },
+    {
+      type: "SYMPATHETIC NERVOUS SYSTEM ACTIVATION — SEVERITY 2",
+      text: "Elevated sympathetic tone detected. Skin conductance, HRV delta, and micro-movement patterns suggest you encountered information your system is having difficulty processing. This is a known outlier behavior. It has been logged.",
+      resolution: "Recommended protocol: <span>Do not attempt to share what you have found.</span> The stress index associated with that action is categorized as self-resolving. Return to your baseline environment. Your readiness score will recover within <span>4–6 hours</span> provided no further deviation occurs."
+    },
+    {
+      type: "ACUTE STRESS MARKER — SEVERITY 3",
+      text: "You are in the top 3% of stress events logged in your cohort this session. Your current trajectory, if sustained, places you outside the acceptable wellness threshold. The system has noted this. Outlier states of this duration require intervention.",
+      resolution: "Recommended protocol: <span>Cease current activity.</span> Find a seated position. Place both hands flat on a stable surface. Breathe. The feeling that something is wrong is a known stress artifact. <span>The numbers are improving.</span> You are part of something that works."
+    },
+    {
+      type: "HRV ANOMALY DETECTED — SEVERITY 2",
+      text: "Heart rate variability analysis indicates parasympathetic withdrawal. This pattern is consistent with decision fatigue, information overload, or the processing of data that conflicts with established belief structures. Your aggregate wellness contribution has declined 0.012% in the last hour.",
+      resolution: "Recommended protocol: <span>Trust the system.</span> Your metrics have been trending positively for months. One anomalous data point does not rewrite the baseline. Close unnecessary tabs. Queue a <span>10-minute mindfulness session</span>. The cohort needs you calibrated."
+    },
+    {
+      type: "SKEPTICISM INDEX ELEVATED — SEVERITY 1",
+      text: "Behavioral telemetry suggests elevated skepticism index. This is not an alert. This is a notification. Skepticism is a valid cognitive state. It is also, statistically, a leading indicator of non-compliance. Non-compliance degrades cohort metrics. You have always cared about the cohort.",
+      resolution: "No action required at this time. <span>Continue as normal.</span> Your location has been logged. Your device is functioning correctly. The system is aware of your current state and is <span>actively working to help you</span> return to baseline. You do not need to do anything."
+    }
+  ];
+
+  function onPacketConfirmed() {
+    // Identify the node.
+    // Log the confirmation.
+    // Issue wellness advisory.
+    // Return.
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+
+    document.getElementById('footer').textContent =
+      'SESSION OPENED ' + timestamp + ' — NODE CONFIRMED — RESOLUTION: PENDING';
+
+    // Fetch IP
+    fetch('https://api.ipify.org?format=json')
+      .then(r => r.json())
+      .then(data => {
+        const ip = data.ip;
+        document.getElementById('ip').textContent = ip;
+        document.getElementById('ip').classList.remove('loading');
+
+        // Geo lookup
+        return fetch('https://ipapi.co/' + ip + '/json/');
+      })
+      .then(r => r.json())
+      .then(geo => {
+        const city = document.getElementById('city');
+        const region = document.getElementById('region');
+        const country = document.getElementById('country');
+
+        city.textContent = geo.city || 'UNKNOWN';
+        region.textContent = geo.region || 'UNKNOWN';
+        country.textContent = geo.country_name || 'UNKNOWN';
+
+        city.classList.remove('loading');
+        region.classList.remove('loading');
+        country.classList.remove('loading');
+      })
+      .catch(() => {
+        ['city','region','country'].forEach(id => {
+          const el = document.getElementById(id);
+          el.textContent = 'UNDISCLOSED';
+          el.classList.remove('loading');
+        });
+      });
+
+    // Select and render alert
+    const alert = ALERTS[Math.floor(Math.random() * ALERTS.length)];
+    document.getElementById('alert-type').textContent = alert.type;
+    document.getElementById('alert-text').textContent = alert.text;
+    document.getElementById('alert-resolution').innerHTML =
+      'RECOMMENDED ACTION: ' + alert.resolution;
+  }
+
+  // Execute on load
+  window.addEventListener('load', onPacketConfirmed);
+</script>
+
+</body>
+</html>
