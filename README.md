@@ -59,4 +59,4 @@ We were too busy checking our readiness scores.
 ---
 
 *Daniel Davidson Baird is the author of* [Echo Confirmed](https://your-link-here), 
-*a novel about what we built when we weren't paying attention.*
+*a novel about building something you didn't know you were building.*
