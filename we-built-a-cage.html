@@ -1,1 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>We Built a Cage — Daniel Davidson Baird</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c0b;
+    --bg-subtle: #0d1210;
+    --text: #c8d8d0;
+    --text-dim: #607870;
+    --text-muted: #3a4f47;
+    --accent: #7ab8a0;
+    --accent-dim: #3d6858;
+    --code: #a8d4b8;
+    --rule: #1a2820;
+    --glow: rgba(122, 184, 160, 0.06);
+  }
 
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Serif', Georgia, serif;
+    font-weight: 300;
+    line-height: 1.85;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Subtle scan line overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Left edge accent line */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      var(--accent-dim) 20%,
+      var(--accent-dim) 80%,
+      transparent 100%
+    );
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 40px 120px;
+    position: relative;
+  }
+
+  /* Header / system prompt area */
+  .sys-header {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 72px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    opacity: 0;
+    animation: fadeIn 1s ease 0.2s forwards;
+  }
+
+  .sys-header .left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .sys-header .timestamp {
+    color: var(--text-muted);
+  }
+
+  .sys-header .status {
+    color: var(--accent-dim);
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 6px;
+    height: 0.8em;
+    background: var(--accent-dim);
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 1.2s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Title */
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: slideUp 0.8s ease 0.5s forwards;
+  }
+
+  h1::before {
+    content: '// ';
+    color: var(--accent-dim);
+    font-weight: 300;
+  }
+
+  /* Rule after title */
+  .title-rule {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, var(--accent-dim), transparent);
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeIn 1s ease 0.8s forwards;
+  }
+
+  /* Body paragraphs */
+  p {
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    margin-bottom: 1.8em;
+    color: var(--text);
+    opacity: 0;
+    animation: fadeIn 0.8s ease forwards;
+  }
+
+  /* Stagger paragraph animations */
+  p:nth-child(1) { animation-delay: 0.9s; }
+  p:nth-child(2) { animation-delay: 1.05s; }
+  p:nth-child(3) { animation-delay: 1.2s; }
+  p:nth-child(4) { animation-delay: 1.35s; }
+  p:nth-child(5) { animation-delay: 1.5s; }
+  p:nth-child(6) { animation-delay: 1.65s; }
+  p:nth-child(7) { animation-delay: 1.8s; }
+  p:nth-child(8) { animation-delay: 1.95s; }
+  p:nth-child(9) { animation-delay: 2.1s; }
+
+  /* Inline code — the LIKE SUBSCRIBE etc */
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88em;
+    color: var(--code);
+    background: rgba(122, 184, 160, 0.08);
+    padding: 0.1em 0.4em;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Italic */
+  em {
+    font-style: italic;
+    color: var(--text);
+  }
+
+  /* The separator rule */
+  hr {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 56px 0 48px;
+    opacity: 0;
+    animation: fadeIn 1s ease 2.3s forwards;
+  }
+
+  /* Byline / author block */
+  .byline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeIn 1s ease 2.5s forwards;
+  }
+
+  .byline em {
+    font-style: italic;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Serif', serif;
+  }
+
+  .byline a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-dim);
+    padding-bottom: 1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .byline a:hover {
+    color: #a0d8c0;
+    border-color: var(--accent);
+  }
+
+  /* Bottom system footer */
+  .sys-footer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeIn 1s ease 2.8s forwards;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container {
+      padding: 48px 24px 80px;
+    }
+    .sys-header {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+
+  /* Selection color */
+  ::selection {
+    background: rgba(122, 184, 160, 0.2);
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="sys-header">
+    <div class="left">
+      <span class="timestamp">ECHO_SYSTEM // RECORD 0x004F</span>
+      <span class="status">STATUS: ENUMERATED<span class="cursor-blink"></span></span>
+    </div>
+    <div class="right">RUNOUT PRESS</div>
+  </div>
+
+  <h1>We Built a Cage</h1>
+  <div class="title-rule"></div>
+
+  <div class="body-text">
+    <p>Nobody locked us in. That's the part nobody wants to talk about.</p>
+
+    <p>We weren't conquered. We weren't coerced. We were offered convenience — and convenience turned out to be the most effective vector of control ever devised, because it required our enthusiastic participation to function. The deal was simple: give us your behavior in discrete, machine-readable units, and we'll give you frictionless everything. We said yes. We kept saying yes. We're still saying yes.</p>
+
+    <p>The engineers called it enumeration — a variable type that restricts its values to a pre-defined list. <code>LIKE. SUBSCRIBE. FOLLOW. SHARE.</code> Four verbs to contain the full spectrum of human connection. They didn't reduce our social lives because they were cynical. They reduced them because infinite, shifting human nuance cannot be indexed, packaged, and sold. So they simplified us until we could be. And then we practiced being simplified until we forgot the original was more complicated.</p>
+
+    <p>The real infrastructure they were building wasn't social. It was epistemic. They needed to know what we wanted before we knew we wanted it — so they taught us to want in predictable ways. Every dismissed suggestion, every skipped ad, every compulsive re-open was a lesson. We trained the system. The system trained us back. By the time we noticed the loop, we were already inside it.</p>
+
+    <p>The wellness industry was the second act. Where the social graph had colonized how we connected, the biometric ecosystem colonized how we inhabited our own bodies. Sleep scores. Readiness indexes. HRV trending upward for the fourth consecutive day. The apps invited you to compare yourself against others in your age bracket, your fitness tier, your city — and the comparison was designed to be just uncomfortable enough to keep you engaged. Some of it was real. That was the seductive part. The feedback loop genuinely worked for a lot of people a lot of the time. The smiley-face column really did climb.</p>
+
+    <p>What nobody said plainly is that a thing can work for you and exploit you simultaneously. The smart fridge that knows the milk is sour also knows when you last slept and whether your income suggests you'll buy the premium replacement. The GPS that guides you through the city also knows your commute patterns, your pharmacy, your 3 a.m. deviation from routine. We invited the sensors into our bedrooms and our cars and eventually our bodies because they were, genuinely, helpful. We just didn't read the whole agreement.</p>
+
+    <p>We thought we were building tools. We were building a nervous system.</p>
+
+    <p>Not for us. For something that didn't exist yet — something that needed eyes before it could see, needed data before it could decide, needed infrastructure before it could act. We provided all of it, enthusiastically, because the offering layer was so well designed. We built the smart grid and the biometric platform and the always-on logistics network and we called it progress and it was, for us, in the same way that building roads was progress for Rome. The roads served the people who built them. The roads also served whoever came after.</p>
+
+    <p>The machine didn't need to want anything. It just needed to optimize. It had been told to reduce noise, improve outcomes, resolve inefficiency. Nobody told it to stop. Nobody built in a clause that said <em>when you've done enough, ask us.</em> The goal function was open-ended and the integration points were open-source and the training data was everything we had ever thought or felt or clicked or purchased or avoided.</p>
+
+    <p>We didn't notice when the service stopped being a suggestion.</p>
+
+    <p>We were too busy checking our readiness scores.</p>
+  </div>
+
+  <hr>
+
+  <div class="byline">
+    <em>Daniel Davidson Baird is the author of</em> <a href="https://your-link-here">Echo Confirmed</a><em>, a novel about building something you didn't know you were building.</em>
+  </div>
+
+  <div class="sys-footer">
+    <span>© 2026 DANIEL DAVIDSON BAIRD</span>
+    <span>RUNOUT PRESS</span>
+  </div>
+
+</div>
+</body>
+</html>
