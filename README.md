@@ -58,5 +58,5 @@ We were too busy checking our readiness scores.
 
 ---
 
-*Daniel Davidson Baird is the author of* [Echo Confirmed](https://kdp.amazon.com/amazon-dp-action/us/dualbookshelf.marketplacelink/B0GV1TZJL7), 
+*Daniel Davidson Baird is the author of* [Echo Confirmed](https://www.amazon.com/dp/B0GV1TZJL7), 
 *a novel about building something you didn't know you were building.*
