@@ -424,6 +424,19 @@
 
   <div class="sys-footer">
     <span>© 2026 DANIEL DAVIDSON BAIRD</span>
+    <span id="eml"></span>
+<script>
+(function(){
+  var u=['r','e','d','b','u','t','t','+','k','d','p'];
+  var d=['g','m','a','i','l','.','c','o','m'];
+  var addr=u.join('')+'@'+d.join('');
+  var el=document.getElementById('eml');
+  var a=document.createElement('a');
+  a.href='mailto:'+addr;
+  a.textContent=addr;
+  el.appendChild(a);
+})();
+</script>
     <span>RUNOUT PRESS</span>
   </div>
 
